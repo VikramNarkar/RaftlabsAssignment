@@ -54,7 +54,9 @@ namespace ExternalProvider.Services
             int currentPage = 1;
             bool hasMoreUsers = true;
 
-            HttpClient client = _httpClientFactory.CreateClient("UserClient");                        
+            HttpClient client = _httpClientFactory.CreateClient("UserClient");
+
+            client.DefaultRequestHeaders.Add("x-api-key", "reqres-free-v1");
 
             while (hasMoreUsers)
             {
