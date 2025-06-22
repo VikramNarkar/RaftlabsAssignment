@@ -6,11 +6,31 @@ using Newtonsoft.Json;
 using System.Net;
 using AutoMapper;
 using ExternalProvider.Services;
+using Microsoft.Extensions.Options;
+using ExternalProvider.Models.Config;
+
 
 namespace ExternalProviderTest.Services
 {
     public class ExternalUserServiceTests
-    {      
+    {
+        private ExternalUserService CreateService(HttpClient client, IMapper? mapperOverride = null)
+        {
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            httpClientFactoryMock.Setup(f => f.CreateClient("UserClient")).Returns(client);
+
+            var mapper = mapperOverride ?? new Mock<IMapper>().Object;
+
+            var options = Options.Create(new ExternalApiSettings
+            {
+                BaseUrl = "https://reqres.in/api/",
+                ApiKey = "reqres-free-v1"
+            });
+
+
+            return new ExternalUserService(httpClientFactoryMock.Object, mapper, options);
+        }
+
 
         [Fact]
         public async Task GetUserByIdAsync_ReturnsMappedUser_WhenApiSuccess()
@@ -59,7 +79,9 @@ namespace ExternalProviderTest.Services
                     Avatar = "avatar1.jpg"
                 });
 
-            var service = new ExternalUserService(httpClientFactoryMock.Object, mapperMock.Object);
+
+            var service = CreateService(mockHttpClient, mapperMock.Object);
+
 
             // Act
             var user = await service.GetUserByIdAsync(1);
@@ -117,7 +139,7 @@ namespace ExternalProviderTest.Services
                     new User { Id = 2, Email = "adam.fondoble@example.com", FirstName = "Adam", LastName = "Fondoble", Avatar = "avatar2.jpg" }
                 });
 
-            var service = new ExternalUserService(httpClientFactoryMock.Object, mapperMock.Object);
+            var service = CreateService(mockHttpClient, mapperMock.Object);
 
             // Act
             var users = await service.GetAllUsersAsync();
@@ -154,7 +176,7 @@ namespace ExternalProviderTest.Services
 
             var mapperMock = new Mock<IMapper>();
 
-            var service = new ExternalUserService(httpClientFactoryMock.Object, mapperMock.Object);
+            var service = CreateService(mockHttpClient, mapperMock.Object);
 
             // Act & Assert
             await Assert.ThrowsAsync<HttpRequestException>(() => service.GetAllUsersAsync());
@@ -192,7 +214,7 @@ namespace ExternalProviderTest.Services
 
             var mapperMock = new Mock<IMapper>();
 
-            var service = new ExternalUserService(httpClientFactoryMock.Object, mapperMock.Object);
+            var service = CreateService(mockHttpClient, mapperMock.Object);
 
             var result = await service.GetAllUsersAsync();
 

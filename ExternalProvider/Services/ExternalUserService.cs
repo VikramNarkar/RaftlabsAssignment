@@ -3,30 +3,30 @@ using ExternalProvider.Abstract;
 using ExternalProvider.Models.Domain;
 using ExternalProvider.Models.Dto;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using ExternalProvider.Models.Config;
+using Microsoft.Extensions.Options;
 
 namespace ExternalProvider.Services
 {
     public class ExternalUserService : IExternalUserService
     {
-        IHttpClientFactory _httpClientFactory;
-        IMapper _mapper;
-        public ExternalUserService(IHttpClientFactory httpClientFactory, IMapper mapper)
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMapper _mapper;
+        private readonly ExternalApiSettings _settings;
+        public ExternalUserService(IHttpClientFactory httpClientFactory, IMapper mapper, 
+                                    IOptions<ExternalApiSettings> options)
         {
             _httpClientFactory = httpClientFactory;
             _mapper = mapper;
+            _settings = options.Value;
         }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
             HttpClient client = _httpClientFactory.CreateClient("UserClient");
 
-            client.DefaultRequestHeaders.Add("x-api-key", "reqres-free-v1");
+            client.BaseAddress = new Uri(_settings.BaseUrl);
+            client.DefaultRequestHeaders.Add("x-api-key", _settings.ApiKey);
 
             var response = await client.GetAsync($"users/{id}");
 
@@ -56,7 +56,8 @@ namespace ExternalProvider.Services
 
             HttpClient client = _httpClientFactory.CreateClient("UserClient");
 
-            client.DefaultRequestHeaders.Add("x-api-key", "reqres-free-v1");
+            client.BaseAddress = new Uri(_settings.BaseUrl);
+            client.DefaultRequestHeaders.Add("x-api-key", _settings.ApiKey);
 
             while (hasMoreUsers)
             {
