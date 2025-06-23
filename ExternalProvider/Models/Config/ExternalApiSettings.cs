@@ -10,5 +10,7 @@ namespace ExternalProvider.Models.Config
     {
         public string BaseUrl { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
+
+        public int CacheDurationInSeconds { get; set; } = 300;
     }
 }

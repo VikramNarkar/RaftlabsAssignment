@@ -8,6 +8,8 @@ using AutoMapper;
 using ExternalProvider.Services;
 using Microsoft.Extensions.Options;
 using ExternalProvider.Models.Config;
+using Microsoft.Extensions.Caching.Memory;
+
 
 
 namespace ExternalProviderTest.Services
@@ -27,8 +29,10 @@ namespace ExternalProviderTest.Services
                 ApiKey = "reqres-free-v1"
             });
 
+     
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-            return new ExternalUserService(httpClientFactoryMock.Object, mapper, options);
+            return new ExternalUserService(httpClientFactoryMock.Object, mapper, options, memoryCache);
         }
 
 

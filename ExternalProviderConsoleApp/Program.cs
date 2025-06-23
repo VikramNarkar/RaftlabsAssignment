@@ -51,6 +51,9 @@ services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 services.AddScoped<IExternalUserService, ExternalUserService>();
 services.AddScoped<ExternalProviderConsoleAppRunner>();
 
+//Configure caching
+services.AddMemoryCache();
+
 var serviceProvider = services.BuildServiceProvider();
 
 var runner = serviceProvider.GetRequiredService<ExternalProviderConsoleAppRunner>();
